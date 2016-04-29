@@ -48,6 +48,8 @@ UART_HandleTypeDef huart3;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+uint8_t aTxBuffer[5];
+uint8_t aRxBuffer[5];
 
 /* USER CODE END PV */
 
@@ -93,6 +95,22 @@ int main(void)
   MX_USART3_UART_Init();
 
   /* USER CODE BEGIN 2 */
+  cc_Tx_Init();
+  
+  HAL_Delay(100);
+  
+  manualCalibration();
+
+  HAL_Delay(100);
+
+  SPI2WriteSingledata(0x7F, 0x48); //should expext 112 bytes (110 and 2) needs buffer
+ 
+  SPI2CommandStrobe(STX);   	   //transmit command
+  
+  SPI2CommandStrobe(SRES);         //reset devise. After reset device should be in IDLE
+
+  SPI2CommandStrobe(SFTX);	   //flash Tx fifo. SFTX when in IDLE
+
 
   /* USER CODE END 2 */
 
@@ -580,7 +598,40 @@ return aRxBuffer[1];   //if need be please change this part to return the whole 
 
 }
 
+static uint8_t SPI2WriteSingledata(uint8_t swAdrr, uint8_t swData)
 
+{
+
+//uint8_t aTxBuffer[2];
+//uint8_t aRxBuffer[3];
+
+
+aTxBuffer[0]=swAdrr;    		//		extended address
+aTxBuffer[1]=swData;         //      send dummy so that i can read data
+
+
+aRxBuffer[0]=0x00;
+aRxBuffer[1]=0x00;
+aRxBuffer[2]=0x00;
+//      one more for slot for contingency
+
+
+//ME KANE DUO BUFFER ME KATUSTERHSH
+
+
+HAL_GPIO_WritePin(GPIOB,GPIO_PIN_12,GPIO_PIN_RESET);  	//chip select LOw
+//delay10ms (15);
+HAL_Delay(1);
+HAL_SPI_TransmitReceive(&hspi2, (uint8_t*)aTxBuffer, (uint8_t *)aRxBuffer, 2, 5000); //send and receive 3 bytes
+//delay10ms (15);
+HAL_Delay(1);
+HAL_GPIO_WritePin(GPIOB,GPIO_PIN_12,GPIO_PIN_SET);
+
+//delay10ms (50);
+
+return aRxBuffer[1];   //if need be please change this part to return the whole buffer
+
+}
 
 /* USER CODE END 4 */
 
