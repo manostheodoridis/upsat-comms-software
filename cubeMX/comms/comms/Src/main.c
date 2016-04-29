@@ -34,7 +34,9 @@
 #include "stm32f4xx_hal.h"
 
 /* USER CODE BEGIN Includes */
-
+#include "../../../../cc1120/cc_definitions.h"
+#include "../../../../cc1120/cc_Tx_Init.h"
+#include "../../../../cc1120/cc112x_spi.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -93,7 +95,7 @@ int main(void)
   MX_USART3_UART_Init();
 
   /* USER CODE BEGIN 2 */
-
+  cc_Tx_INIT();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -260,34 +262,34 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(PA_CNTRL_GPIO_Port, PA_CNTRL_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(2RESETN_GPIO_Port, 2RESETN_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(RESETN_RX_GPIO_Port, RESETN_RX_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(2CS_N_GPIO_Port, 2CS_N_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(CS_SPI2_RX_GPIO_Port, CS_SPI2_RX_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, 1RESETN_Pin|1CS_N_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOA, RESETN_TX_Pin|CS_SPI1_TX_Pin, GPIO_PIN_SET);
 
-  /*Configure GPIO pins : PA_CNTRL_Pin 1RESETN_Pin 1CS_N_Pin */
-  GPIO_InitStruct.Pin = PA_CNTRL_Pin|1RESETN_Pin|1CS_N_Pin;
+  /*Configure GPIO pins : PA_CNTRL_Pin RESETN_TX_Pin CS_SPI1_TX_Pin */
+  GPIO_InitStruct.Pin = PA_CNTRL_Pin|RESETN_TX_Pin|CS_SPI1_TX_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : 2RESETN_Pin */
-  GPIO_InitStruct.Pin = 2RESETN_Pin;
+  /*Configure GPIO pin : RESETN_RX_Pin */
+  GPIO_InitStruct.Pin = RESETN_RX_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(2RESETN_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(RESETN_RX_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : 2CS_N_Pin */
-  GPIO_InitStruct.Pin = 2CS_N_Pin;
+  /*Configure GPIO pin : CS_SPI2_RX_Pin */
+  GPIO_InitStruct.Pin = CS_SPI2_RX_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(2CS_N_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(CS_SPI2_RX_GPIO_Port, &GPIO_InitStruct);
 
 }
 

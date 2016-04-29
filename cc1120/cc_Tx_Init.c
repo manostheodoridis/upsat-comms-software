@@ -13,11 +13,13 @@
 # TX power = 15 
 # Packet length mode = Fixed 
 # Symbol rate = 9.6 
-# RX filter BW = 25.000000 */
+# RX filter BW = 25.000000 
+*/
 //
 // Rf settings for CC1120
 //
 #include "cc_Tx_Init.h"
+#include "cc_definitions.h"
 
 void cc_Tx_INIT() {
 

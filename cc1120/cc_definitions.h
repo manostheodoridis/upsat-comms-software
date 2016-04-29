@@ -1,5 +1,7 @@
-#ifndef __CC_REGISTERS_H
-#define __CC_REGISTERS_H#define IOCFG3 0x0000
+#ifndef __CC_DEFINITIONS_H
+#define __CC_DEFINITIONS_H
+
+#define IOCFG3 0x0000
 #define IOCFG2 0x0001
 #define IOCFG1 0x0002
 #define IOCFG0 0x0003
@@ -173,5 +175,5 @@
 #define NUM_RXBYTES 0x2FD7
 #define FIFO_NUM_TXBYTES 0x2FD8
 #define FIFO_NUM_RXBYTES 0x2FD9
-</table>
-</body><html>
+
+#endif

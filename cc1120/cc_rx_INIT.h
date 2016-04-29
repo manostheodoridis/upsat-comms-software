@@ -17,6 +17,7 @@
 //
 // Rf settings for CC1120
 //
+
 #include cc_rx_INIT.h
 
 void cc_rx_INIT() {

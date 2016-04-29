@@ -40,14 +40,14 @@
 
 #define PA_CNTRL_Pin GPIO_PIN_5
 #define PA_CNTRL_GPIO_Port GPIOA
-#define 2RESETN_Pin GPIO_PIN_1
-#define 2RESETN_GPIO_Port GPIOB
-#define 2CS_N_Pin GPIO_PIN_15
-#define 2CS_N_GPIO_Port GPIOE
-#define 1RESETN_Pin GPIO_PIN_10
-#define 1RESETN_GPIO_Port GPIOA
-#define 1CS_N_Pin GPIO_PIN_15
-#define 1CS_N_GPIO_Port GPIOA
+#define RESETN_RX_Pin GPIO_PIN_1
+#define RESETN_RX_GPIO_Port GPIOB
+#define CS_SPI2_RX_Pin GPIO_PIN_15
+#define CS_SPI2_RX_GPIO_Port GPIOE
+#define RESETN_TX_Pin GPIO_PIN_10
+#define RESETN_TX_GPIO_Port GPIOA
+#define CS_SPI1_TX_Pin GPIO_PIN_15
+#define CS_SPI1_TX_GPIO_Port GPIOA
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
