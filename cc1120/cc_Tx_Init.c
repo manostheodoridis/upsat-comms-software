@@ -62,14 +62,14 @@ void cc_Tx_INIT() {
     halRfWriteReg(WOR_EVENT0_MSB,0x00);  //Event 0 Configuration MSB
     halRfWriteReg(WOR_EVENT0_LSB,0x00);  //Event 0 Configuration LSB
     halRfWriteReg(PKT_CFG2,0x04);        //Packet Configuration Reg. 2
-    halRfWriteReg(PKT_CFG1,0x45);        //Packet Configuration Reg. 1
-    halRfWriteReg(PKT_CFG0,0x00);        //Packet Configuration Reg. 0
+    halRfWriteReg(PKT_CFG1,0x05);        //Packet Configuration Reg. 1
+    halRfWriteReg(PKT_CFG0,0x20);        //Packet Configuration Reg. 0
     halRfWriteReg(RFEND_CFG1,0x0F);      //RFEND Configuration Reg. 1
     halRfWriteReg(RFEND_CFG0,0x00);      //RFEND Configuration Reg. 0
     halRfWriteReg(PA_CFG2,0x7F);         //Power Amplifier Configuration Reg. 2
     halRfWriteReg(PA_CFG1,0x56);         //Power Amplifier Configuration Reg. 1
     halRfWriteReg(PA_CFG0,0x7D);         //Power Amplifier Configuration Reg. 0
-    halRfWriteReg(PKT_LEN,0x03);         //Packet Length Configuration
+    halRfWriteReg(PKT_LEN,0xFF);         //Packet Length Configuration
     halRfWriteReg(IF_MIX_CFG,0x04);      //IF Mix Configuration
     halRfWriteReg(FREQOFF_CFG,0x20);     //Frequency Offset Correction Configuration
     halRfWriteReg(TOC_CFG,0x0B);         //Timing Offset Correction Configuration

@@ -1,16 +1,6 @@
 #ifndef __CC_COMMANDS_H
 #define __CC_COMMANDS_H
 
-#define RXFIRST                  0xD2
-#define TXFIRST                  0xD3
-#define RXLAST                   0xD4
-#define TXLAST                   0xD5
-#define NUM_TXBYTES              0xD6  /* Number of bytes in TXFIFO */
-#define NUM_RXBYTES              0xD7  /* Number of bytes in RXFIFO */
-#define FIFO_NUM_TXBYTES         0xD8
-#define FIFO_NUM_RXBYTES         0xD9
-
-
 /* DATA FIFO Access */
 #define SINGLE_TXFIFO            0x3F      /*  TXFIFO  - Single accecss to Transmit FIFO */
 #define BURST_TXFIFO             0x7F      /*  TXFIFO  - Burst accecss to Transmit FIFO  */
@@ -19,8 +9,6 @@
 
 #define LQI_CRC_OK_BM            0x80
 #define LQI_EST_BM               0x7F
-
-
 
 /* Command strobe registers */
 #define SRES                     0x30      /*  SRES    - Reset chip. */

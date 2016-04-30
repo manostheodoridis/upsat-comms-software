@@ -34,7 +34,9 @@
 #include "stm32f4xx_hal.h"
 
 /* USER CODE BEGIN Includes */
-
+#include "../../../cc1120/cc_commands.h"
+#include "../../../cc1120/cc_definitions.h"
+#include "../../../cc1120/cc_Tx_init.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -48,8 +50,8 @@ UART_HandleTypeDef huart3;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-uint8_t aTxBuffer[5];
-uint8_t aRxBuffer[5];
+uint8_t aTxBuffer[500];
+uint8_t aRxBuffer[500];
 
 /* USER CODE END PV */
 
@@ -64,7 +66,19 @@ static void MX_USART3_UART_Init(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
+static uint8_t SPI2WriteSingledata(uint8_t swAdrr, uint8_t swData);
+static uint8_t SPI2CommandStrobe(uint8_t CMDStrobe);
+static void manualCalibration(void);
+static uint8_t SPI2ReadExtended(uint8_t srExtndAdrr, uint8_t srData);
 
+static uint8_t SPI1WriteSingledata(uint8_t swAdrr, uint8_t swData);
+static uint8_t SPI1ReadSingle(uint8_t srAdrr);
+static uint8_t SPI1ReadExtended(uint8_t srExtndAdrr, uint8_t srData);
+static uint8_t SPI1CommandStrobe(uint8_t CMDStrobe);
+
+static uint8_t SPI1WriteManydata(uint8_t *data, uint8_t size);
+
+extern void cc_Tx_INIT();
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -95,7 +109,13 @@ int main(void)
   MX_USART3_UART_Init();
 
   /* USER CODE BEGIN 2 */
-  cc_Tx_Init();
+  HAL_GPIO_WritePin(GPIOA, RESETN_TX_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(PA_CNTRL_GPIO_Port, PA_CNTRL_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOA,GPIO_PIN_15,GPIO_PIN_SET);
+
+  SPI1ReadExtended(0x8F, 0x00);
+  
+  cc_Tx_INIT();
   
   HAL_Delay(100);
   
@@ -103,13 +123,57 @@ int main(void)
 
   HAL_Delay(100);
 
-  SPI2WriteSingledata(0x7F, 0x48); //should expext 112 bytes (110 and 2) needs buffer
- 
-  SPI2CommandStrobe(STX);   	   //transmit command
+  //SPI1WriteSingledata(0x7F, 0x48); //should expext 112 bytes (110 and 2) needs buffer
   
-  SPI2CommandStrobe(SRES);         //reset devise. After reset device should be in IDLE
+  aTxBuffer[0] = 0x7E;
+  
+  aTxBuffer[1] = 0x82;
+  aTxBuffer[2] = 0x84;
+  aTxBuffer[3] = 0x86;
+  aTxBuffer[4] = 0x88;
+  aTxBuffer[5] = 0x40;
+  aTxBuffer[6] = 0x40;
+  aTxBuffer[7] = 0x60;
+  aTxBuffer[8] = 0x82;
+  aTxBuffer[9] = 0x84;
+  aTxBuffer[10] = 0x86;
+  aTxBuffer[11] = 0x88;
+  aTxBuffer[12] = 0x40;
+  aTxBuffer[13] = 0x40;
+  aTxBuffer[14] = 0x61;
+  aTxBuffer[15] = 0x03;
+  aTxBuffer[16] = 0xf0;
+  aTxBuffer[17] = 0x48;
+  aTxBuffer[18] = 0x45;
+  aTxBuffer[19] = 0x4c;
+  aTxBuffer[20] = 0x4c;
+  aTxBuffer[21] = 0x4f;
+  aTxBuffer[22] = 0x20;
+  aTxBuffer[23] = 0x57;
+  aTxBuffer[24] = 0x4f;
+  aTxBuffer[25] = 0x52;
+  aTxBuffer[26] = 0x4c;
+  aTxBuffer[27] = 0x44;
+  aTxBuffer[28] = 0x20;
+  aTxBuffer[29] = 0x46;
+  aTxBuffer[30] = 0x52;
+  aTxBuffer[31] = 0x4f;
+  aTxBuffer[32] = 0x4d;
+  aTxBuffer[33] = 0x20;
+  aTxBuffer[34] = 0x53;
+  aTxBuffer[35] = 0x50;
+  aTxBuffer[36] = 0x41;
+  aTxBuffer[37] = 0x43;
+  aTxBuffer[38] = 0x45;
 
-  SPI2CommandStrobe(SFTX);	   //flash Tx fifo. SFTX when in IDLE
+  //for(uint8_t i = 1; i < 120; i++) { aTxBuffer[i] = 0x48; }
+  SPI1WriteManydata(aTxBuffer, 39);
+  
+  SPI1CommandStrobe(STX);   	   //transmit command
+  
+  SPI1CommandStrobe(SRES);         //reset devise. After reset device should be in IDLE
+
+  SPI1CommandStrobe(SFTX);	   //flash Tx fifo. SFTX when in IDLE
 
 
   /* USER CODE END 2 */
@@ -121,7 +185,64 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
+     cc_Tx_INIT();
+  
+  HAL_Delay(100);
+  
+  manualCalibration();
 
+  HAL_Delay(100);
+  
+  aTxBuffer[0] = 0x7E;
+  
+  aTxBuffer[1] = 0x82;
+  aTxBuffer[2] = 0x84;
+  aTxBuffer[3] = 0x86;
+  aTxBuffer[4] = 0x88;
+  aTxBuffer[5] = 0x40;
+  aTxBuffer[6] = 0x40;
+  aTxBuffer[7] = 0x60;
+  aTxBuffer[8] = 0x82;
+  aTxBuffer[9] = 0x84;
+  aTxBuffer[10] = 0x86;
+  aTxBuffer[11] = 0x88;
+  aTxBuffer[12] = 0x40;
+  aTxBuffer[13] = 0x40;
+  aTxBuffer[14] = 0x61;
+  aTxBuffer[15] = 0x03;
+  aTxBuffer[16] = 0xf0;
+  aTxBuffer[17] = 0x48;
+  aTxBuffer[18] = 0x45;
+  aTxBuffer[19] = 0x4c;
+  aTxBuffer[20] = 0x4c;
+  aTxBuffer[21] = 0x4f;
+  aTxBuffer[22] = 0x20;
+  aTxBuffer[23] = 0x57;
+  aTxBuffer[24] = 0x4f;
+  aTxBuffer[25] = 0x52;
+  aTxBuffer[26] = 0x4c;
+  aTxBuffer[27] = 0x44;
+  aTxBuffer[28] = 0x20;
+  aTxBuffer[29] = 0x46;
+  aTxBuffer[30] = 0x52;
+  aTxBuffer[31] = 0x4f;
+  aTxBuffer[32] = 0x4d;
+  aTxBuffer[33] = 0x20;
+  aTxBuffer[34] = 0x53;
+  aTxBuffer[35] = 0x50;
+  aTxBuffer[36] = 0x41;
+  aTxBuffer[37] = 0x43;
+  aTxBuffer[38] = 0x45;
+
+      SPI1WriteManydata(aTxBuffer, 39);
+      
+      SPI1CommandStrobe(STX);   	   //transmit command
+      
+      SPI1CommandStrobe(SRES);         //reset devise. After reset device should be in IDLE
+
+      SPI1CommandStrobe(SFTX);	   //flash Tx fifo. SFTX when in IDLE
+      
+      HAL_Delay(5000);
   }
   /* USER CODE END 3 */
 
@@ -278,34 +399,34 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(PA_CNTRL_GPIO_Port, PA_CNTRL_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(2RESETN_GPIO_Port, 2RESETN_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(RESETN_RX_GPIO_Port, RESETN_RX_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(2CS_N_GPIO_Port, 2CS_N_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(CS_SPI2_RX_GPIO_Port, CS_SPI2_RX_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, 1RESETN_Pin|1CS_N_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOA, RESETN_TX_Pin|CS_SPI1_TX_Pin, GPIO_PIN_SET);
 
-  /*Configure GPIO pins : PA_CNTRL_Pin 1RESETN_Pin 1CS_N_Pin */
-  GPIO_InitStruct.Pin = PA_CNTRL_Pin|1RESETN_Pin|1CS_N_Pin;
+  /*Configure GPIO pins : PA_CNTRL_Pin RESETN_TX_Pin CS_SPI1_TX_Pin */
+  GPIO_InitStruct.Pin = PA_CNTRL_Pin|RESETN_TX_Pin|CS_SPI1_TX_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : 2RESETN_Pin */
-  GPIO_InitStruct.Pin = 2RESETN_Pin;
+  /*Configure GPIO pin : RESETN_RX_Pin */
+  GPIO_InitStruct.Pin = RESETN_RX_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(2RESETN_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(RESETN_RX_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : 2CS_N_Pin */
-  GPIO_InitStruct.Pin = 2CS_N_Pin;
+  /*Configure GPIO pin : CS_SPI2_RX_Pin */
+  GPIO_InitStruct.Pin = CS_SPI2_RX_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(2CS_N_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(CS_SPI2_RX_GPIO_Port, &GPIO_InitStruct);
 
 }
 
@@ -329,23 +450,23 @@ uint8_t writeByte3;
 /*1) Set VCO cap-array to 0 (FS_VCO2 = 0x00)*/
 writeByte3 = 0x00;
 
-SPI2WriteExtended(CC112X_FS_VCO2,writeByte3);
+halRfWriteReg(FS_VCO2,writeByte3);
 
 
 /*
 2) Start with high VCDAC (original VCDAC_START + 2): IT IS A READ OP*/
 
-orgnlfscal2 = SPI2ReadExtended(CC112X_FS_CAL2, 0x00);
+orgnlfscal2 = SPI1ReadExtended((uint8_t)(0x00FF & FS_CAL2), 0x00);
 
 writeByte3 = orgnlfscal2 + 0x02;
 
 
-SPI2WriteExtended(CC112X_FS_CAL2,writeByte3);
+halRfWriteReg(FS_CAL2,writeByte3);
 
 /*3) Calibrate and wait for calibration to be done
 	         (radio back in IDLE state)*/
 
-SPI2CommandStrobe(CC112X_SCAL);
+SPI1CommandStrobe(SCAL);
 //delay10ms(1);
 HAL_Delay(1);
 /*do {
@@ -359,26 +480,26 @@ HAL_Delay(1);
 
 
 
-Resultsvcdac_strtH0=	SPI2ReadExtended(CC112X_FS_CAL2, 0x00);
-Resultsvcdac_strtH1=	SPI2ReadExtended(CC112X_FS_VCO4, 0x00);
-Resultsvcdac_strtH2=	SPI2ReadExtended(CC112X_FS_CHP, 0x00);
+Resultsvcdac_strtH0=	SPI1ReadExtended((uint8_t)(0x00FF & FS_CAL2), 0x00);
+Resultsvcdac_strtH1=	SPI1ReadExtended((uint8_t)(0x00FF & FS_VCO4), 0x00);
+Resultsvcdac_strtH2=	SPI1ReadExtended((uint8_t)(0x00FF & FS_CHP), 0x00);
 /* 5) Set VCO cap-array to 0 (FS_VCO2 = 0x00)*/
 
 writeByte3 = 0x00;
 
-SPI2WriteExtended(CC112X_FS_VCO2,writeByte3);
+halRfWriteReg(FS_VCO2,writeByte3);
 
 
 /*6) Set VCO cap-array to 0 (FS_VCO2 = 0x00)*/
 
 writeByte3 = orgnlfscal2;
 
-SPI2WriteExtended(CC112X_FS_CAL2,writeByte3);
+halRfWriteReg(FS_CAL2,writeByte3);
 
 /*  7) Calibrate and wait for calibration to be done
 (radio back in IDLE state)*/
 
-SPI2CommandStrobe(CC112X_SCAL);
+SPI1CommandStrobe(SCAL);
 //delay10ms(1);
 HAL_Delay(1);
 /*do {
@@ -389,9 +510,9 @@ HAL_Delay(1);
 /*8) Read FS_VCO2, FS_VCO4 and FS_CHP register obtained
        with mid VCDAC_START value*/
 
-Resultsvcdac_strtM0=	SPI2ReadExtended(CC112X_FS_CAL2, 0x00);
-Resultsvcdac_strtM1=	SPI2ReadExtended(CC112X_FS_VCO4, 0x00);
-Resultsvcdac_strtM2=	SPI2ReadExtended(CC112X_FS_CHP, 0x00);
+Resultsvcdac_strtM0=	SPI1ReadExtended((uint8_t)(0x00FF & FS_CAL2), 0x00);
+Resultsvcdac_strtM1=	SPI1ReadExtended((uint8_t)(0x00FF & FS_VCO4), 0x00);
+Resultsvcdac_strtM2=	SPI1ReadExtended((uint8_t)(0x00FF & FS_CHP), 0x00);
 
 /*9) Write back highest FS_VCO2 and corresponding FS_VCO
 and FS_CHP result*/
@@ -400,24 +521,23 @@ if (Resultsvcdac_strtH0 >
 Resultsvcdac_strtM0) {
 
 	writeByte3 = Resultsvcdac_strtH0;
-    SPI2WriteExtended(CC112X_FS_VCO2,writeByte3);
+    halRfWriteReg(FS_VCO2,writeByte3);
     writeByte3 = Resultsvcdac_strtH1;
-    SPI2WriteExtended(CC112X_FS_VCO4,writeByte3);
+    halRfWriteReg(FS_VCO4,writeByte3);
     writeByte3 = Resultsvcdac_strtH2;
-    SPI2WriteExtended(CC112X_FS_CHP,writeByte3);
+    halRfWriteReg(FS_CHP,writeByte3);
 } else {
 	writeByte3 = Resultsvcdac_strtM0;
-	SPI2WriteExtended(CC112X_FS_VCO2,writeByte3);
+	halRfWriteReg(FS_VCO2,writeByte3);
 	writeByte3 = Resultsvcdac_strtM1;
-	SPI2WriteExtended(CC112X_FS_VCO4,writeByte3);
+	halRfWriteReg(FS_VCO4,writeByte3);
 	writeByte3 = Resultsvcdac_strtM2;
-	SPI2WriteExtended(CC112X_FS_CHP,writeByte3);
+	halRfWriteReg(FS_CHP,writeByte3);
 }
 
 }
 
-static uint8_t SPI2CommandStrobe(uint8_t CMDStrobe)
-
+static uint8_t SPI1CommandStrobe(uint8_t CMDStrobe)
 {
 
 
@@ -439,13 +559,12 @@ aRxBuffer[3]=0x00;      //      one more for slot for contingency
 
 //      one more for slot for contingency
 
-HAL_GPIO_WritePin(GPIOB,GPIO_PIN_12,GPIO_PIN_RESET);  	//chip select LOw
+HAL_GPIO_WritePin(GPIOA,GPIO_PIN_15,GPIO_PIN_RESET);  	//chip select LOw
 //delay10ms (15);
 HAL_Delay(1);
-HAL_SPI_TransmitReceive(&hspi2, (uint8_t*)aTxBuffer, (uint8_t *)aRxBuffer, 1, 5000); //send and receive 1 bytes
+HAL_SPI_TransmitReceive(&hspi1, (uint8_t*)aTxBuffer, (uint8_t *)aRxBuffer, 1, 5000); //send and receive 1 bytes
 //delay10ms (15);
-HAL_Delay(1);
-HAL_GPIO_WritePin(GPIOB,GPIO_PIN_12,GPIO_PIN_SET);
+HAL_GPIO_WritePin(GPIOA,GPIO_PIN_15,GPIO_PIN_SET);
 
 //delay10ms (50);
 
@@ -453,8 +572,7 @@ return aRxBuffer[0];   //if need be please change this part to return the whole 
 
 }
 
-static uint8_t SPI2ReadExtended(uint8_t srExtndAdrr, uint8_t srData)
-
+static uint8_t SPI1ReadExtended(uint8_t srExtndAdrr, uint8_t srData)
 {
 
 	//uint8_t aTxBuffer[3];
@@ -474,96 +592,18 @@ aRxBuffer[3]=0x00;      //      one more for slot for contingency
 
 
 
-HAL_GPIO_WritePin(GPIOE,GPIO_PIN_15,GPIO_PIN_RESET);  	//chip select LOw
-//delay10ms (1);
-HAL_Delay(1);
-HAL_SPI_TransmitReceive(&hspi2, (uint8_t*)aTxBuffer, (uint8_t *)aRxBuffer, 3, 10); //send and receive 3 bytes
-//delay10ms (1);
-HAL_Delay(1);
-HAL_GPIO_WritePin(GPIOE,GPIO_PIN_15,GPIO_PIN_SET);
-
-return aRxBuffer[2];  //if need be please change this part to return the whole buffer
-
-}
-
-
-
-static uint8_t SPI1ReadExtended(uint8_t srExtndAdrr, uint8_t srData)
-
-{
-
-	//uint8_t aTxBuffer[3];
-	//uint8_t aRxBuffer[4];
-
-aTxBuffer[0]=0xAF;
-aTxBuffer[1]=srExtndAdrr;    		//		extended address
-aTxBuffer[2]=srData;         //      send dummy so that i can read data
-
-
-aRxBuffer[0]=0x00;
-aRxBuffer[1]=0x00;
-aRxBuffer[2]=0x00;
-aRxBuffer[3]=0x00;      //      one more for slot for contingency
-
-
-
-
-
 HAL_GPIO_WritePin(GPIOA,GPIO_PIN_15,GPIO_PIN_RESET);  	//chip select LOw
 //delay10ms (1);
-
 HAL_Delay(1);
-HAL_SPI_TransmitReceive(&hspi1, (uint8_t*)aTxBuffer, (uint8_t *)aRxBuffer, 3, 5000); //send and receive 3 bytes
+HAL_SPI_TransmitReceive(&hspi1, (uint8_t*)aTxBuffer, (uint8_t *)aRxBuffer, 3, 10); //send and receive 3 bytes
 //delay10ms (1);
-HAL_Delay(1);
-
 HAL_GPIO_WritePin(GPIOA,GPIO_PIN_15,GPIO_PIN_SET);
-
 
 return aRxBuffer[2];  //if need be please change this part to return the whole buffer
 
 }
-
-
-static uint8_t SPI2ReadSingle(uint8_t srAdrr)
-
-{
-srAdrr= srAdrr+ 0x80;
-
-//uint8_t aTxBuffer[2];
-//uint8_t aRxBuffer[3];
-
-
-aTxBuffer[0]=srAdrr;    		//		extended address
-aTxBuffer[1]=0x00;         //      send dummy so that i can read data
-
-
-aRxBuffer[0]=0x00;
-aRxBuffer[1]=0x00;
-aRxBuffer[2]=0x00;
-//      one more for slot for contingency
-
-
-
-
-
-HAL_GPIO_WritePin(GPIOE,GPIO_PIN_15,GPIO_PIN_RESET);  	//chip select LOw
-//delay10ms (15);
-HAL_Delay(1);
-HAL_SPI_TransmitReceive(&hspi2, (uint8_t*)aTxBuffer, (uint8_t *)aRxBuffer, 2, 5000); //send and receive 3 bytes
-//delay10ms (15);
-HAL_Delay(1);
-HAL_GPIO_WritePin(GPIOE,GPIO_PIN_15,GPIO_PIN_SET);
-
-//delay10ms (50);
-
-return aRxBuffer[1];   //if need be please change this part to return the whole buffer
-
-}
-
 
 static uint8_t SPI1ReadSingle(uint8_t srAdrr)
-
 {
 srAdrr= srAdrr+ 0x80;
 
@@ -587,7 +627,7 @@ aRxBuffer[2]=0x00;
 HAL_GPIO_WritePin(GPIOA,GPIO_PIN_15,GPIO_PIN_RESET);  	//chip select LOw
 //delay10ms (15);
 HAL_Delay(1);
-HAL_SPI_TransmitReceive(&&hspi1, (uint8_t*)aTxBuffer, (uint8_t *)aRxBuffer, 2, 5000); //send and receive 3 bytes
+HAL_SPI_TransmitReceive(&hspi1, (uint8_t*)aTxBuffer, (uint8_t *)aRxBuffer, 2, 5000); //send and receive 3 bytes
 //delay10ms (15);
 HAL_Delay(1);
 HAL_GPIO_WritePin(GPIOA,GPIO_PIN_15,GPIO_PIN_SET);
@@ -598,8 +638,25 @@ return aRxBuffer[1];   //if need be please change this part to return the whole 
 
 }
 
-static uint8_t SPI2WriteSingledata(uint8_t swAdrr, uint8_t swData)
+static uint8_t SPI1WriteManydata(uint8_t *data, uint8_t size)
+{
 
+HAL_GPIO_WritePin(GPIOA,GPIO_PIN_15,GPIO_PIN_SET); 	//chip select LOw
+//delay10ms (15);
+HAL_Delay(1);
+HAL_SPI_TransmitReceive(&hspi1, (uint8_t*)data, (uint8_t *)aRxBuffer, size, 5000); //send and receive 3 bytes
+//delay10ms (15);
+HAL_Delay(1);
+HAL_GPIO_WritePin(GPIOA,GPIO_PIN_15,GPIO_PIN_SET);
+
+//delay10ms (50);
+
+return aRxBuffer[1];   //if need be please change this part to return the whole buffer
+
+}
+
+
+static uint8_t SPI1WriteSingledata(uint8_t swAdrr, uint8_t swData)
 {
 
 //uint8_t aTxBuffer[2];
@@ -619,13 +676,13 @@ aRxBuffer[2]=0x00;
 //ME KANE DUO BUFFER ME KATUSTERHSH
 
 
-HAL_GPIO_WritePin(GPIOB,GPIO_PIN_12,GPIO_PIN_RESET);  	//chip select LOw
+HAL_GPIO_WritePin(GPIOA,GPIO_PIN_15,GPIO_PIN_SET); 	//chip select LOw
 //delay10ms (15);
 HAL_Delay(1);
-HAL_SPI_TransmitReceive(&hspi2, (uint8_t*)aTxBuffer, (uint8_t *)aRxBuffer, 2, 5000); //send and receive 3 bytes
+HAL_SPI_TransmitReceive(&hspi1, (uint8_t*)aTxBuffer, (uint8_t *)aRxBuffer, 2, 5000); //send and receive 3 bytes
 //delay10ms (15);
 HAL_Delay(1);
-HAL_GPIO_WritePin(GPIOB,GPIO_PIN_12,GPIO_PIN_SET);
+HAL_GPIO_WritePin(GPIOA,GPIO_PIN_15,GPIO_PIN_SET);
 
 //delay10ms (50);
 
