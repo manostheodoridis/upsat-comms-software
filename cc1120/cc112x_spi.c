@@ -4,7 +4,7 @@
 #define CC_EXT_ADD 0x2F00
 #include "stm32f4xx_hal.h"
 
-extern SPI_HandleTypeDef hspi2;
+extern SPI_HandleTypeDef hspi1;
 
 void halRfWriteReg(uint16_t add, uint8_t val) {
 
@@ -29,13 +29,11 @@ void halRfWriteReg(uint16_t add, uint8_t val) {
 
 	}
 
-	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_12,GPIO_PIN_RESET);  	//chip select LOw
-	
+	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_15,GPIO_PIN_RESET); 	//chip select LOw
 	HAL_Delay(1);
-	HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)aTxBuffer, (uint8_t *)aRxBuffer, len, 5000); //send and receive 3 bytes
-	
-	HAL_Delay(1);
-	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_12,GPIO_PIN_SET);
+	HAL_SPI_TransmitReceive(&hspi1, (uint8_t *)aTxBuffer, (uint8_t *)aRxBuffer, len, 5000); //send and receive 3 bytes
+	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_15,GPIO_PIN_SET);
 
+        aTxBuffer[2] = val; 
 //return aRxBuffer[2];  //if need be please change this part to return the whole buffer
 }
