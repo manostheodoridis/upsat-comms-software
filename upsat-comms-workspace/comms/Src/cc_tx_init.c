@@ -1,6 +1,6 @@
 /*# Modulation format = 2-FSK 
 # Whitening = true 
-# Bit rate = 9.6 
+# Bit rate = 1.2
 # Device address = 0 
 # Packet length = 3 
 # Performance mode = High Performance 
@@ -10,9 +10,9 @@
 # Deviation = 3.997803 
 # Manchester enable = false 
 # Address config = No address check 
-# TX power = 15 
+# TX power = 6 dBm
 # Packet length mode = Fixed 
-# Symbol rate = 9.6 
+# Symbol rate = 1.2
 # RX filter BW = 25.000000 
  */
 //
@@ -44,7 +44,9 @@ static const registerSetting_t TX_preferredSettings[]=
 		{IQIC,               0xC6},
 		{CHAN_BW,            0x08},
 		{MDMCFG0,            0x05},
-		{SYMBOL_RATE2,       0x73},
+		{SYMBOL_RATE2,       0x43},
+		{SYMBOL_RATE1,       0xA9},
+		{SYMBOL_RATE0,       0x2A},
 		{AGC_REF,            0x20},
 		{AGC_CS_THR,         0x19},
 		{AGC_CFG1,           0xA9},
@@ -54,15 +56,15 @@ static const registerSetting_t TX_preferredSettings[]=
 		//{PKT_CFG0,           0x28},
 		{PKT_CFG0,           0x20},
 		//{PA_CFG2,            0x2D},
-		{PA_CFG2,            0x2F},  //4-PACFG2 0X26, 6dBm 0x2B 2dbm 0x22,8 DBM 2F
-
-		{PA_CFG0,            0x7D},
+		{PA_CFG2,            0x6B},  //4-PACFG2 0X26, 6dBm 0x2B 2dbm 0x22,8 DBM 2F
+		{PA_CFG1,            0x56},
+		{PA_CFG0,            0x7E},
 		{PKT_LEN,            0xFF},
 		{IF_MIX_CFG,         0x00},
 		{FREQOFF_CFG,        0x22},
 		{FREQ2,              0x6C},
 		{FREQ1,              0xF3},
-		{FREQ0,              0x54},
+		{FREQ0,              0x34},
 		{FS_DIG1,            0x00},
 		{FS_DIG0,            0x5F},
 		{FS_CAL1,            0x40},
